@@ -1,37 +1,29 @@
 "use server";
 
+import { Types } from "mongoose";
 import Attorneys from "../models/Attorneys";
 
-export async function addAttorneys(data) 
-{
-    const exist = await Attorneys.findOne({"name": data.name});
-    if(exist)
-    {
-        throw new Error("Attorney already exist");
-    }
-    else{
-    const added=await Attorneys.create(data);
-    if(added)
-    {
-        return JSON.parse(JSON.stringify(added));
-    }
-    }
+interface AttorneyData {
+    name: string;
+    [key: string]: any; // Allows additional properties
 }
 
-export async function getAttorneys()
-{
+export async function addAttorneys(data: AttorneyData): Promise<AttorneyData> {
+    const exist = await Attorneys.findOne({ name: data.name });
+    if (exist) {
+        throw new Error("Attorney already exists");
+    }
+    
+    const added = await Attorneys.create(data);
+    return JSON.parse(JSON.stringify(added));
+}
+
+export async function getAttorneys(): Promise<AttorneyData[]> {
     const attorneys = await Attorneys.find();
-    if(attorneys)
-    {
-        return JSON.parse(JSON.stringify(attorneys));
-    }
+    return JSON.parse(JSON.stringify(attorneys));
 }
 
-export async function getAttorneysbyId(id)
-{
+export async function getAttorneysById(id: Types.ObjectId): Promise<AttorneyData | null> {
     const attorney = await Attorneys.findById(id);
-    if(attorney)
-    {
-        return JSON.parse(JSON.stringify(attorney));
-    }
+    return attorney ? JSON.parse(JSON.stringify(attorney)) : null;
 }
